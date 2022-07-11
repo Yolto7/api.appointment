@@ -3,27 +3,6 @@ const User = require("../models/appointment")
 const helpers = {};
 
 //MAKING THE FUNCTIONS
-helpers.encryptPassword = async (password) => {
-  try {
-    const salt = await bcrypt.genSalt(15);
-    const hash = await bcrypt.hash(password, salt);
-
-    return hash;
-  } 
-  catch (err) {
-    throw err;
-  }
-};
-
-helpers.matchPassword = async (password, savedPassword) => {
-  try {
-    return await bcrypt.compare(password, savedPassword);
-  } 
-  catch (err) {
-    throw err;
-  }
-};
-
 helpers.verifyToken = async (req, res, next) => {
   try {
     const bearer = req.headers["authorization"];
@@ -32,7 +11,7 @@ helpers.verifyToken = async (req, res, next) => {
     }
 
     const token = bearer.split(" ")[1];
-    const { data } = jwt.verify(token, "CLINICA");
+    const { data } = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = data.id;
 
     const user = await User.find({id: data.id});
