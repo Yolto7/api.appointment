@@ -1,24 +1,32 @@
-const Appointment = require("../models/appointment");
+const model = require("../models/appointment");
 
 class EntityRepository {
+  static instance
+  model
+
+  constructor(model) {
+    if(!!EntityRepository.instance) {
+      return EntityRepository.instance;
+    }
+
+    EntityRepository.instance = this;
+    this.model = model;
+  }
+
   async filter(filter) {
-    return await Appointment.find({
-      specialty: filter.specialty,
-      date: filter.date,
-      hour: filter.hour,
-      doctor: filter.doctor
-    });
+    const data = await this.model.find(filter);
+    return (data.length > 0) ? data : null;
   }
 
   async create(entity) {
-    const appointment = new Appointment(entity)
-    return await appointment.save()
+    const appointment = new this.model(entity);
+    return await appointment.save();
   }
 
   async assign(id, data) {
     data.status = true
-    return await Appointment.findByIdAndUpdate(id, data);
+    return await this.model.findByIdAndUpdate(id, data, { new: true });
   }
 }
 
-module.exports = new EntityRepository();
+module.exports = new EntityRepository(model);
